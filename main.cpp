@@ -21,9 +21,11 @@
 
 //  ******  Creacion de los hilos de procesamiento  ****************************************************************************************
     //  Reserva de memoria para hilo de procesamiento
+unsigned char R_buffer[1024];                                   //  1024 bytes - Buffer de memoria para el hilo del led rojo
 unsigned char G_buffer[1024];                                   //  1024 bytes - Buffer de memoria para el hilo del led verde
-unsigned char B_buffer[1024];                                   //  1024 bytes - Buffer de memoria para el hilo del led verde
+unsigned char B_buffer[1024];                                   //  1024 bytes - Buffer de memoria para el hilo del led azul
     //  Creacion de los hilos de procesamiento
+Thread thread_ledR(osPriorityNormal, 1024, &R_buffer[0]);       //  Hilo del led verde (prioridad normal, tamano de bufer: 1024 bytes)   
 Thread thread_ledG(osPriorityNormal, 1024, &G_buffer[0]);       //  Hilo del led verde (prioridad normal, tamano de bufer: 1024 bytes)       
 Thread thread_ledB(osPriorityNormal, 1024, &B_buffer[0]);       //  Hilo del led azul (prioridad normal, tamano de bufer: 1024 bytes)
 //  ****************************************************************************************************************************************
@@ -36,6 +38,13 @@ DigitalOut ledB(LED3,1);                                        //  Led azul (LE
 //  ****************************************************************************************************************************************
 
 //  ******  Funciones a ejecutar en los hilos de procesamiento  ****************************************************************************
+    //  Funcion parpadeo led rojo
+void blink_LedR() {
+    while (true) {
+        ThisThread::sleep_for(BLINKING_R);
+        ledR = !ledR;
+    }
+}
     //  Funcion parpadeo led verde
 void blink_LedG() {
     while (true) {
@@ -56,12 +65,13 @@ void blink_LedB() {
 int main()
 {
     // Inicia hilos de procesamiento
+    thread_ledR.start(blink_LedR);                              //  Hilo del led verde - funcion blink_ledG()
     thread_ledG.start(blink_LedG);                              //  Hilo del led verde - funcion blink_ledG()
     thread_ledB.start(blink_LedB);                              //  Hilo del led verde - funcion blink_ledG()
 
-    //  Ciclo de parpadeo del led rojo
-    while (true) {
-        ThisThread::sleep_for(BLINKING_R);
-        ledR = !ledR;
+    //  El hilo principal queda en espera indefinidamente 
+    while(true) {
+        ThisThread::sleep_for(120s);
     }
+                                  
 }
